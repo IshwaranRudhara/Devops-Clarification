@@ -17,7 +17,7 @@ when a new AWS root account is created it is best practice to compliete the task
 Those tasks include:
 	Delete your root access keys
 	Activate MFA on your root account
-	create individual IAM users
+	create individual IAM users 
 	user group to assign permissions
 	apply an IAM password policy
 
