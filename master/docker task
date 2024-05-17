@@ -1,0 +1,31 @@
+dockerfile task        
+
+crearte a dockerfile to install apache2 in ubunu image and build as ubuntuweb:1
+
+crearte a dockerfile to install httpd in centos image and build as centosweb:1
+
+to reduce the size try with openjdk:alpine image  and build as jdkweb:1
+
+FROM ubuntu
+LABEL version="1.0"
+LABEL owner="Hippo"
+LABEL product="ubuntu"
+RUN apt update
+RUN apt -y install apache2
+RUN apt -y install apache2-utils
+RUN apt clean
+WORKDIR /var/www/html
+COPY index.html   .
+EXPOSE 80
+CMD apachectl -DFOREGROUND
+
+FROM centos:7
+LABEL version="1.0"
+LABEL owner="Hippo"
+LABEL product="centos7"
+RUN yum -y update
+RUN yum -y install httpd 
+WORKDIR /var/www/html
+COPY centos.html   ./index.html
+EXPOSE 80
+CMD apachectl -DFOREGROUND

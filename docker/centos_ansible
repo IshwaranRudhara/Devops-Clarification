@@ -1,0 +1,116 @@
+Control machine
+***************
+useradd ansible
+passwd ansible
+visudo
+ansible ALL=(ALL)       NOPASSWD: ALL
+su - ansible
+
+
+sudo yum install epel-release
+sudo  yum install ansible
+ansible --version
+sudo vi /etc/ansible/ansible.cfg
+ssh-keygen -t rsa
+ls -lah
+cd .ssh
+ls -ltr
+ip a
+sudo vi /etc/hosts
+ssh-copy-id hari03041
+ssh-copy-id hari03042
+
+cat /etc/ansible/ansible.cfg | grep -v '#'
+sudo vi /etc/ansible/hosts  // create a group and give only IP
+sudo touch /var/log/ansible.log
+sudo chown ansible:ansible /var/log/ansible.log
+ls -ld /var/log/ansible.log
+ansible -m ping all
+
+Client System
+*****
+useradd ansible
+passwd ansible
+visudo
+su - ansible
+
+ip a
+uname -n
+sudo vi /etc/hosts
+cd .ssh
+ls -ltr
+cat authorized_keys
+
+
+***************************** Ansible Server
+mkdir playbook
+
+vi first.yml
+- hosts: web
+  user: ansible
+  sudo: yes
+  connection: ssh
+  gather_facts: no
+  tasks:
+  - name: Copy from the files directory test file
+    action: copy src=/home/ansible/files/test4.txt dest=/home/ansible/test4.txt owner=ansible group=ansible mode=0655 backup=yes
+
+
+
+vi tree.yml
+- hosts: web
+  user: ansible
+  sudo: yes
+  connection: ssh
+  tasks:
+  - name: Install tree software
+    action: package name=tree state=latest
+
+	
+vi test.yml
+---
+- hosts: all
+  user: ansible
+  become: yes
+  gather_facts: no
+  tasks:
+
+  - name: Install Apache Web Server
+    action: yum name=httpd state=installed
+  - name: Restart HTTPD
+    action: service name=httpd state=restarted
+
+vi webserver.yml
+- hosts: web
+  user: ansible
+  sudo: yes
+  connection: ssh
+  gather_facts: no
+  tasks:
+  - name: Install Apache Web Server
+    action: yum name=httpd state=installed
+  - name: Restart HTTPD
+    action: service name=httpd state=restarted
+
+systemctl status httpd
+
+
+ansible -m ping all
+ansible-playbook first.yml
+ansible-playbook tree.yml
+ansible-playbook webserver.yml
+
+
+- hosts: web
+  user: ansible
+  sudo: yes
+  connection: ssh
+  gather_facts: no
+  tasks:
+  - name: Copy from the files directory test file
+    action: copy src=/home/ansible/playbook/multi-module/webapp/target/webapp.war dest=/opt/tomcat/webapps
+
+
+
+
+

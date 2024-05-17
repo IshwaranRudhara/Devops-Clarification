@@ -1,0 +1,34 @@
+FROM centos:8
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.epel.cloud|g' /etc/yum.repos.d/CentOS-Linux-*
+
+ARG user=developer
+
+RUN dnf install -y httpd unzip
+
+
+LABEL ENV=Dev
+LABEL Clent=Hippo
+LABEL Porduct=AC
+
+WORKDIR /var/www/html/
+
+ENV SAM chocolux
+
+ADD  https://www.free-css.com/assets/files/free-css-templates/download/page293/$SAM.zip ./code.zip
+
+RUN unzip code.zip && mv $SAM*/* .
+
+RUN rm -rf code.zip $SAM*
+
+RUN useradd $user && chown $user:$user /var/www/html -R
+
+USER $user
+
+USER root
+
+COPY sample.sh /sample.sh
+
+RUN chmod +x /sample.sh
+
+CMD apachectl -DFOREGROUND

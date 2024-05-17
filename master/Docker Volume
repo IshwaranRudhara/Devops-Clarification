@@ -1,0 +1,108 @@
+https://docs.docker.com/storage/
+
+Volumes :
+	The recommended way to persist data, stored at /var/lib/docker/volumes/
+
+Bind Mounts:
+	Have limited functionality and you must use the exact file path o the host; volumes recommended
+	
+TMPFS Mounts:
+Stored only in a host's memory in linux
+
+Block Storage:
+	Fixed chunks of data
+	No metadata is stored
+	Best for I/O intensive apps
+	SAN storage uses block storage protocols like iSCSI
+	
+Object Storage :
+	Data is stored with metadata and a unique identifier
+	There is no organization to the objects
+	Scalability is limitless
+	Accessed with HTTP calls
+	Amazon S3 is an example
+	
+
+Docker uses storage driver to manage the contents of the image laymers and the writable container layer. 
+Each storage driver handles the implementation differently, but all drives use stackable image layers and the copy-on-write(COW)strategy
+
+https://docs.docker.com/storage/storagedriver/device-mapper-driver/
+
+Storage Driver: 
+STORAGE drivers are sometime known as Graph drivers. the proper storage driver to use often depends on your operating system and other local configuration factors.
+Overlay2: Current ubuntu and Centos/RHEL version
+aufs: ubuntu 14.04 and older
+devicemaper: centos and earlier.
+
+Storage Models: Persistent data can be managed using several storage models.
+Filesystem storage:
+	Data is stored in the form of a  file system.
+	Used by overlay2 and aufs.
+	Efficient use of memory.
+	Inefficient with write-heavy workloads.
+Blockstorage:
+	Storage data in blocks.
+	used by divicemapper.
+	Efficient with write-heavy workloads.
+Object storage:
+	Stores data in an external object-based store.
+	Application must be designed to use object-based storeage.
+	Flexible and scalable.
+
+	
+https://thenewstack.io/methods-dealing-container-storage
+                                             Image Layers
+						                            Morechanges
+Docker Image		                      	Applications
+Union Filesystem 	                     	Config changes
+						                            Operating system
+						                            Manifest
+						
+							                            Container Layers
+Docker Container		                   Writable Layers
+						                           Image
+						
+https://docs.docker.com/storage/storagedriver/select-storage-driver/
+
+https://docs.docker.com/storage/storagedriver/overlayfs-driver/
+
+Problem with Persistence in Containers
+Each Docker container gets an thin read-write layer, where the files generated/modified by application are present.
+Docker container gets a filesystem which is collection of image layers plus read-write layer mounted on each other but it looks like one filesystem.
+When container tries to edit existing files in image layers , this will not impact image layers as image layers are read-only.
+Internally docker storage system copies the files from read-only image layers to thin read-write layer before modification. This strategy is called as Copy-on-write
+
+
+Docker acheives this functionality with the help of storage drivers.
+The lifetime of Read-Write layer is equal to lifetime of container i.e. once the container is deleted all the contents of writable layer are also deleted.
+Consider we have a database container which is used by other app containers. The data is written into db container from app containers i.e. all of this is present in Writable layer . Now if we delete db container all the data is lost.
+To solve this problem docker has introduced the concept of Volumes.
+	Docker Volumes : https://docs.docker.com/storage/volumes/
+Docker volumes purpose is to persist the data even after container is deleted.
+Docker Volume types
+	bind mount
+	Volume
+	tmpfs
+I want to preserve what ever is present in tmp directory of alpine container.
+Bind mount: Mount existing folder from docker host to any folder in container.
+	Create a folder
+	mount it to the container
+	Create some files
+
+docker container run -d --name bind1 -v /tmp/cont-tmp:/tmp alpine sleep 1d
+docker container exec bind1 touch /tmp/{1..4}.txt
+docker container exec bind1 ls /tmp
+docker container run -d --name bind2 -v /tmp/cont-tmp:/tmp alpine sleep 1d
+docker container exec bind2 ls /tmp
+
+docker container run -d --mount "type=bind,source=/tmp/cont-temp,target=/tmp" --name bind6 alpine sleep 1d
+
+docker volume create my-vol
+docker volume ls
+docker volume inspect my-vol
+
+docekr run -d --name vol1 --mount "source=my-vol,target=tools" alpine sleep 1d
+docekr exec vol1 touch /tool/1.txt
+docekr exec vol1 df -h
+docekr exec vol1
+
